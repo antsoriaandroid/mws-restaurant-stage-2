@@ -264,7 +264,7 @@ nav h1 a {
 }
 #reviews-list li {
   background-color: #fff;
-    border: 2px solid #f3f3f3;
+  border: 2px solid #f3f3f3;
   display: block;
   list-style-type: none;
   margin: 0 0 30px;
@@ -283,8 +283,13 @@ nav h1 a {
 /* ====================== Media Queries ====================== */
 @media screen and (max-width: 640px) {
   .filter-options select {
-      width: 95%;
+    width: 95%;
   }
+
+  #restaurants-list li{
+    width: 100%;
+  }
+
 }
 /*@media screen and (min-width: 641px) and (max-width: 1007px){}*/
 @media screen and (min-width: 641px){
@@ -301,7 +306,7 @@ nav h1 a {
   }
 
   #restaurants-list li {
-    width: calc((100vw - 18em) / 2);
+    width: calc((100vw - 17em) / 2);
   }
 }
 
