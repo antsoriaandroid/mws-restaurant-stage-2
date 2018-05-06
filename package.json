@@ -4,14 +4,6 @@
   "version": "0.0.0",
   "description": "a Sails application",
   "keywords": [],
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "icons": [{
-    "src": "images/touch/homescreen.jpg",
-    "sizes": "48x48",
-    "type": "image/png"
-  }],
   "dependencies": {
     "include-all": "^1.0.0",
     "rc": "1.0.1",
