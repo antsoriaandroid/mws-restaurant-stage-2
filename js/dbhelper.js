@@ -8,13 +8,14 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 8000 // Change this to your server port
+    const port = 1337; // Change this to your server port
     const isDevModeOn = true;
     let url=`http://localhost:${port}/`;
     if(isDevModeOn){
       url=window.location;
     } 
-    url+=`data/restaurants.json`  
+    url+=`restaurants`
+      return `http://localhost:${port}/data/restaurants.json`;
     return url;
   }
 
@@ -22,20 +23,68 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
+      if('indexedDB' in window){
+          console.log('This browser does support IndexedDB');
+          fetchRestaurantsFromIDB(callback);
+      } else {
+          console.log('This browser does NOT support IndexedDB');
+          fetchRestaurantsFromJSON(callback);
       }
-    };
-    xhr.send();
   }
+
+  static fetchRestaurantsFromIDB(callback) {
+      const dbPromise = idb.open('restaurants', 1, upgradeDB => {
+          if( !upgradeDB.objectStoreNames.contains('restaurant-details') )
+          {
+              upgradeDB.createObjectStore('restaurant-details', {
+                  keyPath: 'id',
+                  autoIncrement : true
+              });
+              var store = upgradeDB.transaction.objectStore('restaurant-details');
+              store.createIndex('by-id', 'id');
+          }
+      });
+
+      dbPromise.then( db => {
+          if( !db ){
+              fetchRestaurantsFromJSON(callback)
+          }
+          else{
+              //get the data from the indexedDB
+              // console.log('get from database');
+              var restaurantsJSON = [];
+              var tx = db.transaction('restaurant-details');
+              var store = tx.objectStore('restaurant-details');
+              store.getAll()
+                  .then(function(results){
+                      callback(null, results);
+                      // console.log(results);
+                  });
+              tx.complete;
+          }
+      } );
+  }
+
+  }
+
+  static fetchRestaurantsFromJSON(callback){
+      console.log("Fetching data from server");
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', DBHelper.DATABASE_URL);
+      xhr.onload = () => {
+          if (xhr.status === 200) { // Got a success response from server!
+              const json = JSON.parse(xhr.responseText);
+              const restaurants = json.restaurants;
+              callback(null, restaurants);
+          } else { // Oops!. Got an error from server.
+              const error = (`Request failed. Returned status of ${xhr.status}`);
+              callback(error, null);
+          }
+      };
+      xhr.send();
+  }
+
+
 
   /**
    * Fetch a restaurant by its ID.
