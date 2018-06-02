@@ -25,10 +25,10 @@ class DBHelper {
   static fetchRestaurants(callback) {
       if('indexedDB' in window){
           console.log('This browser does support IndexedDB');
-          fetchRestaurantsFromIDB(callback);
+          DBHelper.fetchRestaurantsFromIDB(callback);
       } else {
           console.log('This browser does NOT support IndexedDB');
-          fetchRestaurantsFromJSON(callback);
+          DBHelper.fetchRestaurantsFromJSON(callback);
       }
   }
 
@@ -47,7 +47,7 @@ class DBHelper {
 
       dbPromise.then( db => {
           if( !db ){
-              fetchRestaurantsFromJSON(callback)
+              DBHelper. fetchRestaurantsFromJSON(callback)
           }
           else{
               //get the data from the indexedDB
@@ -63,8 +63,6 @@ class DBHelper {
               tx.complete;
           }
       } );
-  }
-
   }
 
   static fetchRestaurantsFromJSON(callback){
@@ -161,7 +159,7 @@ class DBHelper {
   /**
    * Fetch all neighborhoods with proper error handling.
    */
-  static fetchNeighborhoods(callback) {
+  static fetchNeighborhoods(callback){
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
