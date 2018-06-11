@@ -1,6 +1,10 @@
 /**
  * Common database helper functions.
  */
+const DB_NAME = 'restaurantsDB';
+const DB_TABLE_NAME = 'restaurant-details';
+
+
 class DBHelper {
 
   /**
@@ -9,13 +13,13 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    const isDevModeOn = true;
+    const isDevModeOn = false;
     let url=`http://localhost:${port}/`;
     if(isDevModeOn){
       url=window.location;
-    } 
-    url+=`restaurants`
-      return `http://localhost:${port}/data/restaurants.json`;
+    }
+    url+=`restaurants`;
+     // return `http://localhost:${port}/data/restaurants.json`;
     return url;
   }
 
@@ -23,29 +27,34 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-      if('indexedDB' in window){
-          console.log('This browser does support IndexedDB');
-          DBHelper.fetchRestaurantsFromIDB(callback);
-      } else {
-          console.log('This browser does NOT support IndexedDB');
-          DBHelper.fetchRestaurantsFromJSON(callback);
-      }
+      return DBHelper.getCachedRestaurants().then(restaurants => {
+          if(restaurants.length) {
+              return Promise.resolve(restaurants);
+          } else {
+              return DBHelper.fetchRestaurantsFromAPI();
+          }
+      }).then(restaurants=> {
+          callback(null, restaurants);
+      }).catch(error => {
+          callback(error, null);
+      });
   }
 
   static fetchRestaurantsFromIDB(callback) {
-      const dbPromise = idb.open('restaurants', 1, upgradeDB => {
-          if( !upgradeDB.objectStoreNames.contains('restaurant-details') )
+      const dbPromise = idb.open(DB_NAME, 1, upgradeDB => {
+          console.log('making a new object store');
+          if( !upgradeDB.objectStoreNames.contains(DB_TABLE_NAME) )
           {
-              upgradeDB.createObjectStore('restaurant-details', {
+              upgradeDB.createObjectStore(DB_TABLE_NAME, {
                   keyPath: 'id',
                   autoIncrement : true
               });
-              var store = upgradeDB.transaction.objectStore('restaurant-details');
+              var store = upgradeDB.transaction.objectStore(DB_TABLE_NAME);
               store.createIndex('by-id', 'id');
           }
       });
 
-      dbPromise.then( db => {
+      dbPromise.then( function(db) {
           if( !db ){
               DBHelper. fetchRestaurantsFromJSON(callback)
           }
@@ -53,8 +62,8 @@ class DBHelper {
               //get the data from the indexedDB
               // console.log('get from database');
               var restaurantsJSON = [];
-              var tx = db.transaction('restaurant-details');
-              var store = tx.objectStore('restaurant-details');
+              var tx = db.transaction(DB_TABLE_NAME);
+              var store = tx.objectStore(DB_TABLE_NAME);
               store.getAll()
                   .then(function(results){
                       callback(null, results);
@@ -144,7 +153,7 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        let results = restaurants
+        let results = restaurants;
         if (cuisine != 'all') { // filter by cuisine
           results = results.filter(r => r.cuisine_type == cuisine);
         }
@@ -166,9 +175,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
+        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
         // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
+        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i);
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -184,9 +193,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
+        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
         // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
+        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i);
         callback(null, uniqueCuisines);
       }
     });
@@ -201,7 +210,7 @@ class DBHelper {
 
   /**
    * Restaurant image URL.
-   */
+   */urlForRestaurant
   static imageUrlForRestaurant(restaurant) {
     return (`./img/${restaurant.photograph}`);
   }
