@@ -142,6 +142,8 @@ createRestaurantHTML = (restaurant) => {
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.setAttribute('alt','Picture of restaurant ' + restaurant.name);
+  /*image.srcset = "/img/" + restID + "-small.jpg 200w, /img/" + restID + "-medium.jpg 400w, /img/" + restID + ".jpg 1065w";
+  image.sizes="(max-width: 640px) 280px, (max-width: 1007px) 800px";*/
   li.append(image);
 
   const name = document.createElement('h2');
@@ -192,4 +194,8 @@ if ('serviceWorker' in navigator) {
     });
 } else {
     console.log('Service workers are not supported.');
+}
+
+if (!('indexedDB' in window)) {
+    console.log('This browser doesn\'t support IndexedDB');
 }
