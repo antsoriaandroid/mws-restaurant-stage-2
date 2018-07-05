@@ -12,7 +12,7 @@ class DBHelper {
      */
     static get DATABASE_URL() {
         const port = 1337; // Change this to your server port
-        return `http://localhost:${port}/restaurants`;
+        return `http://localhost:${port}/restaurants/`;
     }
 
     /*Method to open an IDB*/
@@ -200,7 +200,7 @@ class DBHelper {
      * Restaurant page URL.
      */
     static urlForRestaurant(restaurant) {
-        return (`./restaurant.html?id=${restaurant.id}`);
+        return DBHelper.DATABASE_URL+restaurant.id;
     }
 
     /**
