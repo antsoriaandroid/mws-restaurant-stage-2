@@ -3,6 +3,7 @@
  */
 const DB_NAME = 'restaurantsDB';
 const DB_TABLE_NAME = 'restaurant-details';
+const DB_REVIEW_TABLE_NAME = 'reviews';
 
 class DBHelper {
 
@@ -15,6 +16,11 @@ class DBHelper {
         return `http://localhost:${port}/restaurants/`;
     }
 
+    static get REVIEWS_URL() {
+        const port = 1337; // Change this to your server port
+        return `http://localhost:${SERVER_PORT}/reviews/`;
+    }
+
     /*Method to open an IDB*/
     static openIDB() {
         // Check service worker support, if it is not supported I don't do anything
@@ -23,10 +29,15 @@ class DBHelper {
         }
         console.log('Opening IDB');
         return idb.open(DB_NAME, 1, upgradeDb => {
-            var store = upgradeDb.createObjectStore(DB_TABLE_NAME, {
+            let store = upgradeDb.createObjectStore(DB_TABLE_NAME, {
                 keyPath: 'id'
             });
             store.createIndex('by-id', 'id');
+
+            let reviewStore = upgradeDb.createObjectStore(DB_REVIEW_TABLE_NAME, {
+                keyPath: 'id'
+            });
+            reviewStore.createIndex('by-id', 'id');
         });
     }
 
@@ -39,13 +50,30 @@ class DBHelper {
 
             let tx = db.transaction(DB_TABLE_NAME, 'readwrite');
             let store = tx.objectStore(DB_TABLE_NAME);
-           // data.forEach(function (restaurant) {
-                console.log('Inserting in IDB: '+data);
-                store.put(data);
-           // });
+            // data.forEach(function (restaurant) {
+            console.log('Inserting in IDB: ' + data);
+            store.put(data);
+            // });
 
             return tx.complete;
         });
+    }
+
+    static updateFavouriteStatusIDB(restaurantId, isFavourite) {
+        fetch(DBHelper.DATABASE_URL+`${restaurantId}/?is_favorite=${isFavourite}`, { method: 'PUT' })
+            .then(() => {
+                DBHelper.openIDB()
+                    .then( db => {
+                        let tx = db.transaction(DB_TABLE_NAME, 'readwrite');
+                        let restaurantsStore = tx.objectStore(DB_TABLE_NAME);
+                        restaurantsStore.get(restaurantId)
+                            .then(restaurant => {
+                                restaurant.is_favorite = isFavourite;
+                                restaurantsStore.put(restaurant);
+                            });
+                    })
+            })
+
     }
 
     /**
@@ -61,26 +89,15 @@ class DBHelper {
 
             store.getAll().then(function (items) {
                 // IDB is empty
-                if (items.length < 1) {
-
-                    let xhr = new XMLHttpRequest();
-                    xhr.open('GET', DBHelper.DATABASE_URL);
-                    xhr.onload = () => {
-                        if (xhr.status === 200) { // Got a success response from server!
-                            const restaurants = JSON.parse(xhr.responseText);
-                            console.log('values '+restaurants);
-                            //DBHelper.insertIDB(restaurants);
-                            restaurants.forEach(function (restaurant) {
-                                DBHelper.insertIDB(restaurant);
+                    if (items.length < 1) {
+                        fetch(DBHelper.DATABASE_URL)
+                            .then(response=>response.json())
+                            .then (restaurants=> {
+                                console.log('values ' + restaurants);
+                                restaurants.forEach(restaurant => {
+                                    DBHelper.insertIDB(restaurant);
+                                });
                             });
-                            callback(null, restaurants);
-                        } else { // Oops!. Got an error from server.
-                            const error = (`Request failed. Returned status of ${xhr.status}`);
-                            callback(error, null);
-                        }
-                    }
-                    xhr.send();
-
                 } else {
                     callback(null, items);
                 }
@@ -200,7 +217,6 @@ class DBHelper {
      * Restaurant page URL.
      */
     static urlForRestaurant(restaurant) {
-       // return DBHelper.DATABASE_URL+restaurant.id;
         return (`./restaurant.html?id=${restaurant.id}`);
     }
 
@@ -224,6 +240,33 @@ class DBHelper {
             }
         );
         return marker;
+    }
+
+
+
+
+    static saveReviewToIDB(reviewsToSave) {
+        return DBHelper.openDatabase().then(function (db) {
+            if (!db) return;
+
+            let tx = db.transaction(DB_REVIEW_TABLE_NAME, 'readwrite');
+            let store = tx.objectStore(DB_REVIEW_TABLE_NAME);
+            store.put(reviewsToSave);
+
+            return tx.complete;
+        });
+    }
+
+    static addReviews(id) {
+        return fetch(DBHelper.REVIEWS_URL + `?restaurant_id=${id}`)
+            .then(function (response) {
+                return response.json();
+            }).then(reviews => {
+                reviews.forEach(function (review) {
+                    saveReviewToIDB(review);
+                });
+                return reviews;
+            });
     }
 
 }
