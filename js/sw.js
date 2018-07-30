@@ -5,7 +5,7 @@ console.log("Service Worker startup");
 self.addEventListener('install', function(event) {
     console.log("Service Worker installed");
     event.waitUntil(
-        caches.open('CACHE_NAME').then(function(cache) {
+        caches.open(CACHE_NAME).then(function(cache) {
             console.log("Service Worker opening cache");
             return cache.addAll([
                 '/js/dbhelper.js',

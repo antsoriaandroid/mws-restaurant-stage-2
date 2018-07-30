@@ -51,6 +51,9 @@ fetchRestaurantFromURL = (callback) => {
 fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
+  
+  //Fill favourite flag
+  fillFavouriteHTML();
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
@@ -58,7 +61,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img';
   image.setAttribute('alt','Picture of restaurant ' + restaurant.name);
- /* image.srcset = "/img/" + restID + "-small.jpg 200w, /img/" + restID + "-medium.jpg 400w, /img/" + restID + ".jpg 1065w";
+  /*image.srcset = "/img/" + restID + "-small.jpg 200w, /img/" + restID + "-medium.jpg 400w, /img/" + restID + ".jpg 1065w";
   image.sizes="(max-width: 640px) 280px, (max-width: 1007px) 800px";*/
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
 
@@ -69,6 +72,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
+
   // fill reviews
   fillReviewsHTML();
 }
@@ -92,6 +96,41 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
     hours.appendChild(row);
   }
 }
+
+
+fillFavouriteHTML = (restaurant=reviews = self.restaurant) => {
+	const favourite = document.getElementById('restaurant-favourite');
+
+	const favouriteButton = document.createElement('button');
+    favouriteButton.classList.add("favourite-button");
+    if(restaurant.is_favorite){
+        favouriteButton.innerHTML = 'I love it❤';
+        favouriteButton.classList.add("favourite");
+        favouriteButton.setAttribute('aria-label', 'Unmark as favourite restaurant');
+    } else {
+        favouriteButton.innerHTML = 'Not favourite';
+        favouriteButton.classList.remove("favourite");
+        favouriteButton.setAttribute('aria-label', 'Mark as favourite restaurant');
+    }
+
+    favouriteButton.onclick = function () {
+        restaurant.is_favorite =  !restaurant.is_favorite;
+        if(restaurant.is_favorite){
+            favouriteButton.innerHTML = 'I love it❤';
+            favouriteButton.classList.add("favourite");
+            favouriteButton.setAttribute('aria-label', 'Unmark as favourite restaurant');
+        } else {
+            favouriteButton.innerHTML = 'Not favourite';
+            favouriteButton.classList.remove("favourite");
+            favouriteButton.setAttribute('aria-label', 'Mark as favourite restaurant');
+        }
+        DBHelper.updateFavouriteStatusIDB(restaurant.id, restaurant.is_favorite);
+
+    };
+    favourite.appendChild(favouriteButton);
+}
+
+
 
 /**
  * Create all reviews HTML and add them to the webpage.
@@ -163,4 +202,42 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+function  addReview() {
+  alert('UNDER DEVELOPMENT');
+    var name = document.getElementById('name').value;
+    var rating = document.getElementById('rating').value;
+    var comments = document.getElementById('comments').value;
+
+    const restaurant_id = getParameterByName('id');
+    console.log("Adding review with name \"" + name + "\" rating " + rating + " and comments \"" + comments + "\" for restaurant with id " + restaurant_id);
+
+    var url = 'http://localhost:1337/reviews/';
+    var data = {restaurant_id: restaurant_id, name: name, rating: rating, comments: comments};
+
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: new Headers({
+            'Content-Type': 'application/json'
+        })
+    })
+        .then(res => {
+            res.json()
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            cacheAddReviewRequestInIndexedDbDatabase(url, data, restaurant_id);
+        })
+        .then(response => {
+            console.log('Success:', response)
+        });
+
+    DBHelper.updateRestaurantStoreReviewAttribute(data, name, rating, comments, restaurant_id);
+
+    document.getElementById('name').value="";
+    document.getElementById('rating').value="";
+    document.getElementById('comments').value="";
+    fillReviewsHTML();
 }

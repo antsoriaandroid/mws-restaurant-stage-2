@@ -40,6 +40,7 @@
     <!-- Beginning restaurant -->
     <section id="restaurant-container">
       <h1 id="restaurant-name"></h1>
+      <p id="restaurant-favourite"></p>
       <img id="restaurant-img">
       <p id="restaurant-cuisine"></p>
       <p id="restaurant-address"></p>
@@ -48,7 +49,31 @@
     <!-- end restaurant -->
     <!-- Beginning reviews -->
     <section id="reviews-container">
+
       <ul id="reviews-list"></ul>
+      <div id="add-review">
+        <form id="review-form">
+         <h2 class="">Add your review</h2>
+          <h3>Name</h3>
+          <input id="name" class="" type="text" aria-label="Review writer's name" required/>
+          <h3>Rating:</h3>
+          <select id="rating" class="" aria-label="Raview rate restaurant" required>
+            <option value="0">Rate restaurant</option>
+            <option value="1">1 point</option>
+            <option value="2">2 points</option>
+            <option value="3">3 points</option>
+            <option value="4">4 points</option>
+            <option value="5">5 points</option>
+          </select><br><br>
+
+          <h3>Comments</h3></label>
+          <textarea id="comments" class="comment-box" cols="20" rows="5" aria-label="Review comment" required></textarea><br>
+          <div id="reviews-form-error"></div>
+
+          <input type="button" id="submitButton" onclick="addReview();" value="Send your review" aria-pressed="false"  aria-label="Send review"/>
+        </form>
+
+      </div>
     </section>
     <!-- End reviews -->
   </main>
