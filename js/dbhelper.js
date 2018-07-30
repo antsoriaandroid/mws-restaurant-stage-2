@@ -18,7 +18,7 @@ class DBHelper {
 
     static get REVIEWS_URL() {
         const port = 1337; // Change this to your server port
-        return `http://localhost:${SERVER_PORT}/reviews/`;
+        return `http://localhost:${port}/reviews/`;
     }
 
     /*Method to open an IDB*/
@@ -28,7 +28,7 @@ class DBHelper {
             return Promise.resolve();
         }
         console.log('Opening IDB');
-        return idb.open(DB_NAME, 1, upgradeDb => {
+        return idb.open(DB_NAME, 2, upgradeDb => {
             let store = upgradeDb.createObjectStore(DB_TABLE_NAME, {
                 keyPath: 'id'
             });
@@ -246,7 +246,7 @@ class DBHelper {
 
 
     static saveReviewToIDB(reviewsToSave) {
-        return DBHelper.openDatabase().then(function (db) {
+        return DBHelper.openIDB().then(function (db) {
             if (!db) return;
 
             let tx = db.transaction(DB_REVIEW_TABLE_NAME, 'readwrite');
@@ -257,16 +257,27 @@ class DBHelper {
         });
     }
 
-    static addReviews(id) {
-        return fetch(DBHelper.REVIEWS_URL + `?restaurant_id=${id}`)
+    static updateRestaurantStoreReview(data, name, rating, comments, restaurant_id) {
+        return fetch(DBHelper.REVIEWS_URL + `?restaurant_id=${restaurant_id}`)
             .then(function (response) {
                 return response.json();
             }).then(reviews => {
                 reviews.forEach(function (review) {
-                    saveReviewToIDB(review);
+                    DBHelper.saveReviewToIDB(review);
                 });
                 return reviews;
             });
     }
 
+    static fetchReviewsByRestaurantId(restaurant_id) {
+        return fetch(DBHelper.REVIEWS_URL + `?restaurant_id=${restaurant_id}`)
+            .then(function (response) {
+                return response.json();
+            }).then(reviews => {
+                reviews.forEach(function (review) {
+                    DBHelper.saveReviewToIDB(review);
+                });
+                return reviews;
+            });
+    }
 }
