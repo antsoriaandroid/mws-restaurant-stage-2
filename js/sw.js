@@ -62,3 +62,9 @@ self.addEventListener('fetch', function(event) {
         })
     );
 });
+
+self.addEventListener('sync', function(event) {alert();
+  if (event.tag === 'SyncReviews') {
+    event.waitUntil(DBHelper.synchronizeReviews(review));
+  }
+});

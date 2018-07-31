@@ -242,9 +242,6 @@ class DBHelper {
         return marker;
     }
 
-
-
-
     static saveReviewToIDB(reviewsToSave) {
         return DBHelper.openIDB().then(function (db) {
             if (!db) return;
@@ -279,5 +276,23 @@ class DBHelper {
                 });
                 return reviews;
             });
+    }
+
+    static synchronizeReviews(event, form) {
+        event.preventDefault();
+        const review = {
+            'restaurant_id': parseInt(form.id.value),
+            'name': form.dname.value,
+            'rating': parseInt(form.drating.value),
+            'comments': form.review.value,
+        };
+
+        fetch(DBHelper.REVIEWS_URL, {
+                                        method: 'PUT',
+                                        body: JSON.stringify(review),
+                                        headers: new Headers({
+                                            'Content-Type': 'application/json'
+                                        })
+                                    })
     }
 }

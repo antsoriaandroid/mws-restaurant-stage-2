@@ -211,7 +211,7 @@ getParameterByName = (name, url) => {
 }
 
 function  addReview() {
-  alert('UNDER DEVELOPMENT');
+
     var name = document.getElementById('review-author-name').value;
     var rating = document.getElementById('review-rating').value;
     var comments = document.getElementById('review-comments').value;
@@ -219,10 +219,14 @@ function  addReview() {
     const restaurant_id = getParameterByName('id');
     console.log("Adding review with name \"" + name + "\" rating " + rating + " and comments \"" + comments + "\" for restaurant with id " + restaurant_id);
 
-    var url = 'http://localhost:1337/reviews/';
-    var data = {restaurant_id: restaurant_id, name: name, rating: rating, comments: comments};
+    let data = {
+                restaurant_id: restaurant_id,
+                name: name,
+                rating: rating,
+                comments: comments
+                };
 
-    fetch(url, {
+    fetch(DBHelper.REVIEWS_URL, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: new Headers({
@@ -234,7 +238,6 @@ function  addReview() {
         })
         .catch(error => {
             console.error('Error:', error);
-            cacheAddReviewRequestInIndexedDbDatabase(url, data, restaurant_id);
         })
         .then(response => {
             console.log('Success:', response)
@@ -246,4 +249,27 @@ function  addReview() {
     document.getElementById('review-rating').value="";
     document.getElementById('review-comments').value="";
     fillReviewsHTML();
+}
+
+if ('serviceWorker' in navigator) {
+    // Register a service worker hosted at the root of the
+    // site using the default scope.
+    //https://developers.google.com/web/fundamentals/primers/service-workers/?hl=es
+    navigator.serviceWorker.register('./js/sw.js')
+        .then(function (registration) {
+            console.log('Service worker registration succeeded:', registration);
+        }).catch(function (error) {
+        console.log('Service worker registration failed:', error);
+    });
+
+    navigator.serviceWorker.ready.then(function(swRegistration) {
+        return swRegistration.sync.register('SyncReviews');
+    });
+
+} else {
+    console.log('Service workers are not supported.');
+}
+
+if (!('indexedDB' in window)) {
+    console.log('This browser doesn\'t support IndexedDB');
 }
