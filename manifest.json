@@ -4,6 +4,7 @@
   "default_locale": "en",
   "name": "Restaurant reviews",
   "short_name": "Restaurant reviews",
+  "display": "browser",
   "icons": [
     {
       "src": "img/icons/icon-192x192.png",
