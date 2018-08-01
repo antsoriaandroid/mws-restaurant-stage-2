@@ -4,6 +4,7 @@
   "default_locale": "en",
   "name": "Restaurant reviews",
   "short_name": "Restaurant reviews",
+  "display": "standalone",
   "icons": [
     {
       "src": "img/icons/icon-192x192.png",
@@ -17,6 +18,5 @@
     }
   ],
   "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "browser"
+  "background_color": "#ffffff"
 }
