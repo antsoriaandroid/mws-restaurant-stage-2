@@ -24,7 +24,8 @@ self.addEventListener('install', function(event) {
                 '/img/7.jpg',
                 '/img/8.jpg',
                 '/img/9.jpg',
-                '/img/10.jpg'
+                '/img/10.jpg',
+				'/manifest.json'
             ]).catch(function (err){
                 console.log("Error: Service worker install failed: ", err);
             });
