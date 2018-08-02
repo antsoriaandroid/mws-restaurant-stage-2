@@ -1,6 +1,6 @@
 {
   "author": "Antonio Soria",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "default_locale": "en",
   "name": "Restaurant reviews",
   "short_name": "Restaurant reviews",
