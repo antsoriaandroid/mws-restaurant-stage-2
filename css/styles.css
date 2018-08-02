@@ -294,6 +294,39 @@ nav h1 a {
     width: 100%;
   }
 
+ .inside #main-container {
+    display: flex;
+    flex-flow: column;
+  }
+	.inside #map-container {
+		z-index: 0;
+    height: 300px;
+    width: 100%;
+    padding-top: 50px;
+    position: absolute;
+  }
+    #breadcrumb {
+        width: 100%;
+        /*padding: 10px 40px 16px 20px;*/
+      }
+
+  #restaurant-container {
+    padding: 430px 0 0 0;
+    display: flex;
+    flex-flow: column wrap;
+    width: 100%;
+  }
+
+   #reviews-container {
+      display: flex;
+      flex-flow: column wrap;
+      width: 100%;
+    }
+
+.inside #footer{
+        width: 100%;
+
+      }
 }
 /*@media screen and (min-width: 641px) and (max-width: 1007px){}*/
 @media screen and (min-width: 641px){
@@ -312,6 +345,8 @@ nav h1 a {
   #restaurants-list li {
     width: calc((100vw - 17em) / 2);
   }
+
+
 }
 
 @media screen and (min-width: 1008px){
