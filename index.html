@@ -4,6 +4,7 @@
 <head>
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin=""/>
   <!-- Startup configuration -->
   <link rel="manifest" href="manifest.json">
   <meta charset="utf-8">
@@ -37,12 +38,12 @@
     </section>
   </main>
 
-  <script src="../sw.js"></script>
+  <script src="./sw.js"></script>
   <script type="application/javascript" src="js/idb.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
-
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeYGklucZIufse0mnqyOBmZlycsMnlTUQ&libraries=places&callback=initMap"></script>
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+  <!--<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeYGklucZIufse0mnqyOBmZlycsMnlTUQ&libraries=places&callback=initMap"></script>-->
    <!--<script async type="application/javascript" defer src="https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318&markers=color:red%7Clabel:C%7C40.718217,-73.998284&key=AIzaSyAeYGklucZIufse0mnqyOBmZlycsMnlTUQ"></script>-->
 
   <footer id="footer">
