@@ -1,6 +1,10 @@
 let restaurants,
     neighborhoods,
     cuisines;
+//Google Mpas version
+//var map;
+
+//Mapbox version
 var newMap;
 var markers = [];
 
@@ -8,8 +12,8 @@ var markers = [];
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-	initMap();
-    fetchNeighborhoods();
+    initMap(); // added for Mapbox
+	fetchNeighborhoods();
     fetchCuisines();
 });
 
@@ -69,10 +73,10 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
 }
 
 /**
- * Initialize leaflet map, called from HTML.
+ * Initialize Google map, called from HTML.
  */
-window.initMap = () => {
-   /* let loc = {
+/*window.initMap = () => {
+    let loc = {
         lat: 40.722216,
         lng: -73.987501
     };
@@ -81,15 +85,20 @@ window.initMap = () => {
         center: loc,
         scrollwheel: false
     });
-    updateRestaurants();*/
-	initMap = () => {
+    updateRestaurants();
+}*/
+
+/**
+ * Initialize Mapbox map, called from HTML.
+ */
+initMap = () => {
   self.newMap = L.map('map', {
         center: [40.722216, -73.987501],
         zoom: 12,
         scrollWheelZoom: false
       });
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-    mapboxToken: 'pk.eyJ1IjoiYW50c29yaWFhbmRyb2lkIiwiYSI6ImNqa2RwN29tcjNhYXkzcXBhZWtjNWFhNXMifQ.YW_BB6EsuuEI9sOmZKt4vw',
+    mapboxToken: 'pk.eyJ1IjoiYXNvcmlhIiwiYSI6ImNqa3BhYmh3cTFydGczbG1nejV5NXlnN2kifQ.RY88mSvbnnqDvu_p5ue0MA',
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -97,7 +106,6 @@ window.initMap = () => {
     id: 'mapbox.streets'
   }).addTo(newMap);
   updateRestaurants();
-}
 }
 
 /**
@@ -169,11 +177,13 @@ createRestaurantHTML = (restaurant) => {
 
     const favouriteButton = document.createElement('button');
     favouriteButton.classList.add("favourite-button");
+	//console.log("favorite: "+restaurant.is_favorite+ " id "+ restaurant.name);
     if(restaurant.is_favorite){
         favouriteButton.innerHTML = 'I love it❤';
         favouriteButton.classList.add("favourite");
         favouriteButton.setAttribute('aria-label', 'Unmark as favourite restaurant');
     } else {
+		//console.log( " id "+ restaurant.name);
         favouriteButton.innerHTML = 'Not favourite';
         favouriteButton.classList.remove("favourite");
         favouriteButton.setAttribute('aria-label', 'Mark as favourite restaurant');
@@ -214,18 +224,25 @@ createRestaurantHTML = (restaurant) => {
 }
 
 /**
- * Add markers for current restaurants to the map.
+ * Add markers for current restaurants to the map. Google Maps version
  */
-addMarkersToMap = (restaurants = self.restaurants) => {
-    /*restaurants.forEach(restaurant => {
+/*addMarkersToMap = (restaurants = self.restaurants) => {
+    restaurants.forEach(restaurant => {
         // Add marker to the map
         const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
         google.maps.event.addListener(marker, 'click', () => {
             window.location.href = marker.url
         });
         self.markers.push(marker);
-    });*/
-	  restaurants.forEach(restaurant => {
+    });
+}*/
+
+/**
+ * Add markers for current restaurants to the map. Mapbox Maps version
+ */
+
+ addMarkersToMap = (restaurants = self.restaurants) => {
+	restaurants.forEach(restaurant => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.newMap);
     marker.on("click", onClick);
@@ -233,22 +250,4 @@ addMarkersToMap = (restaurants = self.restaurants) => {
       window.location.href = marker.options.url;
     }
   });
-}
-
-if ('serviceWorker' in navigator) {
-    // Register a service worker hosted at the root of the
-    // site using the default scope.
-    //https://developers.google.com/web/fundamentals/primers/service-workers/?hl=es
-    navigator.serviceWorker.register('./sw.js')
-        .then(function (registration) {
-            console.log('Service worker registration succeeded:', registration);
-        }).catch(function (error) {
-        console.log('Service worker registration failed:', error);
-    });
-} else {
-    console.log('Service workers are not supported.');
-}
-
-if (!('indexedDB' in window)) {
-    console.log('This browser doesn\'t support IndexedDB');
-}
+ }

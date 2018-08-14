@@ -1,8 +1,31 @@
 let restaurant;
+//Google maps version
+//var map;
+
+//Map box version
 var newMap;
 
 /**
- *  Initialize map as soon as the page is loaded.
+ * Initialize Google map, called from HTML.
+ */
+/*window.initMap = () => {
+  fetchRestaurantFromURL((error, restaurant) => {
+    if (error) { // Got an error!
+      console.error(error);
+    } else {
+      self.map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 16,
+        center: restaurant.latlng,
+        scrollwheel: false
+      });
+      fillBreadcrumb();
+      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+    }
+  });
+};*/
+
+/**
+ * Initialize Mapbox map, called from HTML.
  */
 document.addEventListener('DOMContentLoaded', (event) => {  
   initMap();
@@ -21,7 +44,7 @@ initMap = () => {
         scrollWheelZoom: false
       });
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-        mapboxToken: 'pk.eyJ1IjoiYW50c29yaWFhbmRyb2lkIiwiYSI6ImNqa2RwN29tcjNhYXkzcXBhZWtjNWFhNXMifQ.YW_BB6EsuuEI9sOmZKt4vw',
+        mapboxToken: 'pk.eyJ1IjoiYXNvcmlhIiwiYSI6ImNqa3BhYmh3cTFydGczbG1nejV5NXlnN2kifQ.RY88mSvbnnqDvu_p5ue0MA',
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
           '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -32,7 +55,8 @@ initMap = () => {
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.newMap);
     }
   });
-} 
+}  
+ 
 
 /**
  * Get current restaurant from page URL.
@@ -56,9 +80,8 @@ fetchRestaurantFromURL = (callback) => {
       fillRestaurantHTML();
       callback(null, restaurant)
     });
-
   }
-}
+};
 
 /**
  * Create restaurant HTML and add it to the webpage
@@ -93,7 +116,9 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
-  fillReviewsHTML();
+  //fillReviewsHTML();
+  DBHelper.fetchReviewsByRestaurantId(restaurant.id)
+      .then(reviews => fillReviewsHTML(reviews));
 }
 
 /**
@@ -154,12 +179,13 @@ fillFavouriteHTML = (restaurant=reviews = self.restaurant) => {
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (restaurant_id = self.restaurant.id) =>{
-    DBHelper.fetchReviewsByRestaurantId(restaurant_id)
-        .then(reviews => {
+fillReviewsHTML = (reviews = self.restaurant.reviews) =>{
+   // DBHelper.fetchReviewsByRestaurantId(restaurant_id)
+        //.then(reviews => {
             const container = document.getElementById('reviews-container');
               if (!reviews) {
                 const noReviews = document.createElement('p');
+				noReviews.id="no-reviews";
                 noReviews.innerHTML = 'No reviews yet!';
                 container.appendChild(noReviews);
                 return;
@@ -169,8 +195,8 @@ fillReviewsHTML = (restaurant_id = self.restaurant.id) =>{
                 ul.appendChild(createReviewHTML(review));
             });
             container.appendChild(ul);
-        }
-        )
+       // }
+    //    )
 };
 
 /**
@@ -233,14 +259,15 @@ function  addReview() {
     const restaurant_id = getParameterByName('id');
     console.log("Adding review with name \"" + name + "\" rating " + rating + " and comments \"" + comments + "\" for restaurant with id " + restaurant_id);
 
-    let data = {
-                restaurant_id: restaurant_id,
+    let review = {
+                restaurant_id: parseInt(restaurant_id),
                 name: name,
-                rating: rating,
+                rating: parseInt(rating),
                 comments: comments
                 };
 
-    fetch(DBHelper.REVIEWS_URL, {
+
+   /* fetch(DBHelper.REVIEWS_URL, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: new Headers({
@@ -252,38 +279,27 @@ function  addReview() {
         })
         .catch(error => {
             console.error('Error:', error);
+            //cacheAddReviewRequestInIndexedDbDatabase(url, data, restaurant_id);
         })
         .then(response => {
             console.log('Success:', response)
         });
 
-    DBHelper.updateRestaurantStoreReview(data, name, rating, comments, restaurant_id);
-
+    DBHelper.updateRestaurantStoreReview(data, name, rating, comments, restaurant_id);*/
+	DBHelper.addReview(review);
+	
+	//Removing message about no reviews because one has being created.
+	const container = document.getElementById('reviews-container');
+	if (document.getElementById('no-review')) {
+			document.getElementById('no-review').remove();
+	}
+	const ul = document.getElementById('reviews-list');
+	ul.appendChild(createReviewHTML(review));
+    container.appendChild(ul);
+	
     document.getElementById('review-author-name').value="";
     document.getElementById('review-rating').value="";
     document.getElementById('review-comments').value="";
-    fillReviewsHTML();
+   // fillReviewsHTML();
 }
 
-if ('serviceWorker' in navigator) {
-    // Register a service worker hosted at the root of the
-    // site using the default scope.
-    //https://developers.google.com/web/fundamentals/primers/service-workers/?hl=es
-    navigator.serviceWorker.register('./sw.js')
-        .then(function (registration) {
-            console.log('Service worker registration succeeded:', registration);
-        }).catch(function (error) {
-        console.log('Service worker registration failed:', error);
-    });
-
-    navigator.serviceWorker.ready.then(function(swRegistration) {
-        return swRegistration.sync.register('SyncReviews');
-    });
-
-} else {
-    console.log('Service workers are not supported.');
-}
-
-if (!('indexedDB' in window)) {
-    console.log('This browser doesn\'t support IndexedDB');
-}
